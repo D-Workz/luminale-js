@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import {Button, Card} from "@blueprintjs/core";
+import {Button, Card, Tab, Tabs} from "@blueprintjs/core";
 import { fabric } from 'fabric';
+import InputWords from "./InputWords";
+import InputSettings from "./InputSettings";
 
 class Input extends Component {
 
@@ -70,9 +71,13 @@ class Input extends Component {
         canvas.remove(collisionObj);
         canvas.remove(collision.collidedObj)
       }else{
-        collisionObj.top = initialCoords.top;
-        collisionObj.left = initialCoords.left;
-        canvas.renderAll();
+        if(initialCoords.top && initialCoords.left){
+          collisionObj.top = initialCoords.top;
+          collisionObj.left = initialCoords.left;
+          delete initialCoords.left;
+          delete initialCoords.top;
+          canvas.renderAll();
+        }
       }
     }
 
@@ -128,11 +133,13 @@ class Input extends Component {
       collisionPosition = "bottom";
     }
     paramStaticObj.text = (staticObj.text);
-    paramStaticObj.fontSize = 20;
+    paramStaticObj.fontSize = 25;
     return collisionPosition;
   };
 
   render() {
+    const animate = true;
+
     let heigth = window.screen.height - 500;
     const imageWidth = 3448;
     const imageHeigth = 4592;
@@ -141,29 +148,49 @@ class Input extends Component {
     width = width + "px";
     heigth = heigth + "px";
     const Input = () => (
-        <div id="inputCenter">
-        <canvas id="canvas" width={width} height={heigth}/>
+        <div id="input">
+          <canvas id="canvas" width={width} height={heigth}/>
 
-        <Card
-          style={{ width:"100%" }}
-        >
-          hallo
-        </Card>
+          <Card
+            style={{ width:"100%", height:"250px" }}
+          >
+            <Tabs animate={animate} id="dashboard-tabs" onChange={this.refreshTab}>
+              <Tab
+                  id="setting"
+                  title="Einstellungen"
+                  panel={(
+                      <InputSettings
+                          {...this.props}
+                      />
+                  )}
+              />
+              <Tab
+                  id="words"
+                  title="Wörter"
+                  panel={(
+                      <InputWords
+                          {...this.props}
+                      />
+                  )}
+              />
+            </Tabs>
+          </Card>
         </div>
     );
 
     return (
     <div className="App">
       <Input/>
-      <h1>Project Home</h1>
-      {/* Link to List.js */}
-      <Link to={'./list'}>
-        <Button
-            icon="manually-entered-data"
-            text="Data Sources"
-            minimal
-        />
-      </Link>
+      <Button
+          icon="manually-entered-data"
+          text="Save"
+          style={{margin:"auto", display:"block", "marginTop":"10px", "marginLeft":"10px", float:"left"}}
+      />
+      <Button
+          icon="manually-entered-data"
+          text="Vollbild"
+          style={{margin:"auto", display:"block", "marginTop":"10px", "marginRight":"10px", float:"right"}}
+      />
     </div>
     );
   }

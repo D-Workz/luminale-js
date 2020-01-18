@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import {Button, Card} from "@blueprintjs/core";
-import { fabric } from 'fabric';
 
-class InputText extends Component {
+class InputWords extends Component {
 
   constructor(props) {
     super(props);
@@ -28,7 +25,7 @@ class InputText extends Component {
 
 
   render() {
-
+    return(<div>hallo</div>)
   }
 }
-export default InputText;
+export default InputWords;
