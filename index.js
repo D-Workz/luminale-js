@@ -1,17 +1,22 @@
 const express = require('express');
 const path = require('path');
+const fs = require("fs");
 
 const app = express();
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'client')));
 
-// An api endpoint that returns a short list of items
-app.get('/api/getList', (req,res) => {
-	var list = ["item1", "item2", "item3"];
-	res.json(list);
-	console.log('Sent list of items');
+const routesPath = path.join(__dirname, "server/routes/");
+fs.readdirSync(routesPath).forEach(file => {
+	// ignore swap files
+	if (file.startsWith(".")) return;
+
+	console.log(`loading route ${routesPath}/${file}`);
+	// eslint-disable-next-line import/no-dynamic-require,global-require
+	app.use(require(`${routesPath}/${file}`));
 });
+
 
 // Handles any requests that don't match the ones above
 app.get('*', (req,res) =>{

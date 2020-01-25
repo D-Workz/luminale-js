@@ -156,6 +156,7 @@ class Input extends Component {
           >
             <Tabs animate={animate} id="dashboard-tabs" onChange={this.refreshTab}>
               <Tab
+                  className="tab"
                   id="setting"
                   title="Einstellungen"
                   panel={(
@@ -165,6 +166,7 @@ class Input extends Component {
                   )}
               />
               <Tab
+                  className="tab"
                   id="words"
                   title="Wörter"
                   panel={(

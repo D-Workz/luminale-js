@@ -9,6 +9,7 @@ class InputSettings extends Component {
       fontSize: 15,
       dragSize: 18,
       hoverSize: 20,
+      wordCount: 20,
       fontColors:[
           "#48AFF0",
           "#aa007f",
@@ -24,9 +25,13 @@ class InputSettings extends Component {
 
   }
 
+  handleChange = () => {
+
+  };
+
 
   render() {
-    const { fontColors, fontSize, dragSize, hoverSize } = this.state;
+    const { fontColors, fontSize, dragSize, hoverSize, wordCount } = this.state;
     let fontColorsDiv;
     fontColorsDiv = fontColors.map( (color,index) => {
       return(<div key={index+"a"} style={{"backgroundColor":color, width:"10px", height:"10px", margin:"5px"}}></div>)
@@ -53,6 +58,8 @@ class InputSettings extends Component {
           <FormGroup
               label="Drag Size"
               labelInfo="(required)"
+              className="formGroup"
+
               // helperText={error.name && 'Set a name'}
               // intent={error.name ? Intent.DANGER : Intent.NONE}
           >
@@ -67,6 +74,8 @@ class InputSettings extends Component {
           <FormGroup
               label="Hover Size"
               labelInfo="(required)"
+              className="formGroup"
+
               // helperText={error.name && 'Set a name'}
               // intent={error.name ? Intent.DANGER : Intent.NONE}
           >
@@ -78,10 +87,23 @@ class InputSettings extends Component {
                 // intent={error.name ? Intent.DANGER : Intent.NONE}
             />
           </FormGroup>
-        </div>
-        <div>
+          <FormGroup
+                label="Anzahl Wörter"
+                labelInfo="(required)"
+                className="formGroup"
 
-        </div>
+              // helperText={error.name && 'Set a name'}
+                // intent={error.name ? Intent.DANGER : Intent.NONE}
+            >
+              <InputGroup
+                  id="wordCount"
+                  leftIcon="chevron-right"
+                  value={wordCount}
+                  onChange={this.handleChange}
+                  // intent={error.name ? Intent.DANGER : Intent.NONE}
+              />
+            </FormGroup>
+          </div>
         <div style={{width:"50%", float:"right"}}>
           <div style={{float:"left"}}>
             Farben
