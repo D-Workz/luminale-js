@@ -9,7 +9,7 @@ body {
 
 #canvas{
   border: #48AFF0 1px solid;
-  background-image: url("InputBG.jpg");
+  background-image: url("../images/InputBG.jpg");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center; /* Center the image */

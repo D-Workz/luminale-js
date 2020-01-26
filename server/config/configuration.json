@@ -1,10 +1,26 @@
 {
   "input": {
     "fontSize": 15,
+    "fontFamily": "Helvetica Nue, Helvetica, Sans-Serif, Arial, Trebuchet MS",
     "hoverSize": 18,
     "dragSize": 20,
     "wordCount": 15,
-    "wordObjs": []
+    "wordObjs": [
+      {
+        "left": 62,
+        "top": 110
+      },
+      {
+        "left": 500,
+        "top": 265
+      }
+    ],
+    "colors": [
+      "#48AFF0",
+      "#aa007f",
+      "#0c0a7f",
+      "#00aa00"
+    ]
   },
   "output": {
 

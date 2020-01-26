@@ -8,13 +8,14 @@ const upper =  (lower) => {
     });
 };
 /* POST login */
-router.get("/config", async (req, res, next) => {
+router.get("/config/input", async (req, res, next) => {
     try {
         let words = fs.readFileSync( "server/config/words.txt","utf8");
         words = words.split(",\n");
         words = words.map(word => upper(word));
         let config = fs.readFileSync( "server/config/configuration.json", "utf8");
         config = JSON.parse(config);
+        config = config.input;
         return res.json({
             words, config
         });

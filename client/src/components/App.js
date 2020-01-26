@@ -7,17 +7,29 @@ const apiUrl = "http://localhost:5000/";
 class App extends Component {
     constructor(props) {
         super(props);
-        this.state = { apiResponse: "" };
+        this.state = {
+            words: [],
+            config:{},
+            initError : false
+        };
     }
 
     getConfig = async () => {
         let res = await axios({
             method: 'get',
-            url: `${apiUrl}config`,
+            url: `${apiUrl}config/input`,
         });
-        this.setState({
-            apiResponse: res.data.words
-        })
+        if(res.data.length !== 0 && Object.entries(res.data.config).length !== 0 && res.data.config.constructor === Object){
+            this.setState({
+                words: res.data.words,
+                config: res.data.config
+            })
+        }else{
+            this.setState({
+                initError : true
+            })
+        }
+
     };
 
     sendWord = async (word) => {
@@ -25,9 +37,7 @@ class App extends Component {
             method: 'post',
             url: `${apiUrl}word`,
             headers: {'Content-Type':'application/json'},
-            data:{
-                "hans":word
-            }
+            data:{ word }
         });
         this.setState({
             apiResponse: res.data.message
@@ -41,10 +51,16 @@ class App extends Component {
 
 
   render() {
+      const {
+          words,
+          config
+      } = this.state;
       const App = () => (
       <div>
-          <p className="App-intro">;{this.state.apiResponse}</p>
-          <Input/>
+          <Input
+              words={words}
+              config={config}
+          />
       </div>
     );
     return (
