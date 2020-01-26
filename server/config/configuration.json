@@ -1,0 +1,12 @@
+{
+  "input": {
+    "fontSize": 15,
+    "hoverSize": 18,
+    "dragSize": 20,
+    "wordCount": 15,
+    "wordObjs": []
+  },
+  "output": {
+
+  }
+}

@@ -3,10 +3,12 @@ import {Button, Card, Tab, Tabs} from "@blueprintjs/core";
 import { fabric } from 'fabric';
 import InputWords from "./InputWords";
 import InputSettings from "./InputSettings";
+import * as screenfull from "screenfull";
 
 class Input extends Component {
 
   componentDidMount() {
+
     // const { importToShowLogs } = this.props;
 
     var canvas = new fabric.Canvas('canvas');
@@ -112,6 +114,16 @@ class Input extends Component {
     }
     canvas.add(haus);
     canvas.add(mauer);
+    // const element = document.getElementById('canvas');
+    const element = document.getElementById('canvasContainer');
+    document.getElementById('fullscreenInput').addEventListener('click', () => {
+      if (screenfull.isEnabled) {
+        screenfull.request(element);
+        // screenfull.request();
+      } else {
+        // Ignore or do something else
+      }
+    });
   }
 
   indicateCollisionRegion = (paramDraggedObj, paramStaticObj) => {
@@ -149,7 +161,9 @@ class Input extends Component {
     heigth = heigth + "px";
     const Input = () => (
         <div id="input">
-          <canvas id="canvas" width={width} height={heigth}/>
+          <div id="canvasContainer">
+            <canvas id="canvas" width={width} height={heigth}/>
+          </div>
 
           <Card
             style={{ width:"100%", height:"250px" }}
@@ -189,6 +203,7 @@ class Input extends Component {
           style={{margin:"auto", display:"block", "marginTop":"10px", "marginLeft":"10px", float:"left"}}
       />
       <Button
+          id="fullscreenInput"
           icon="manually-entered-data"
           text="Vollbild"
           style={{margin:"auto", display:"block", "marginTop":"10px", "marginRight":"10px", float:"right"}}
