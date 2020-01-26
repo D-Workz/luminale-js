@@ -60,6 +60,7 @@ class App extends Component {
           <Input
               words={words}
               config={config}
+              sendWord={this.sendWord}
           />
       </div>
     );

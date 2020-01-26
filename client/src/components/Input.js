@@ -9,11 +9,13 @@ class Input extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      allWords: props.words,
-      config: props.config,
       canvas : {
+        fabricCanvas:null,
         words: {
-          available : [],
+          available : {
+            words:props.words,
+            coordinates:props.config.wordObjs,
+          },
           displayed : [],
         },
         image:{
@@ -23,18 +25,67 @@ class Input extends Component {
         dimensions: {
           height: 0,
           width: 0
-        }
+        },
+        text: {
+            fontSize: props.config.fontSize,
+            dragSize: props.config.dragSize,
+            hoverSize: props.config.hoverSize,
+            fontFamily: props.config.fontFamily,
+            wordCount: props.config.wordCount,
+            fontColors:props.config.fontColors,
+            wordObjs:props.config.wordObjs
+        },
+        interaction:{
+          active:{},
+          passive:{}
+        },
+        isEdit:false
       },
       isFullscreen : false
     };
   }
 
   initInputScreen = () => {
-    const {allWords, config} = this.state;
-    if(allWords.length !== 0 && Object.entries(config).length !== 0 && config.constructor === Object ){
-
-
+    const {canvas } = this.state;
+    let availableCoords = canvas.words.available.coordinates;
+    const fabricCanvas = canvas.fabricCanvas;
+    if(availableCoords.length !== 0){
+      let availableWords = canvas.words.available.words;
+      const displayWords = availableCoords.map(coordsObj => {
+        const randIndex = Math.floor(Math.random()*availableWords.length);
+        const randomWord = availableWords.splice(randIndex,1)[0];
+        return this.generateTextElement(randomWord, coordsObj.left, coordsObj.top, coordsObj.id);
+      });
+      availableCoords = [];
+      canvas.words.available.coordinates = availableCoords;
+      canvas.words.available.words = availableWords;
+      canvas.words.displayed = displayWords;
+      this.setState({canvas});
     }
+  };
+
+
+  generateTextElement = (word, left, top, id) => {
+    const {canvas} = this.state;
+    const isEdit = canvas['isEdit'];
+    return new fabric.Text(word, {
+      id:id,
+      fill: this.getRandomColor(),
+      angle: -90,
+      hasControls: isEdit,
+      hasBorders: false,
+      fontSize: canvas.text.fontSize,
+      textAlign: 'center',
+      fontFamily: canvas.text.fontFamily,
+      left: left,
+      top: top
+    });
+  };
+
+  saveNewTextFormat = (fontSettings) => {
+    const {canvas} = this.state;
+    canvas.text = fontSettings;
+    this.setState({canvas})
   };
 
   initCanvasDimensions = (height) => {
@@ -42,55 +93,127 @@ class Input extends Component {
     canvas.dimensions.width = height * canvas.image.width / canvas.image.height;
     canvas.dimensions.height = height;
     this.setState({canvas}, () => {
-      this.initInputCanvas();
+      // this.initInputCanvas();
+      this.initializeCanvasObject();
+      const availableCoords = canvas.words.available.coordinates;
+      console.log(availableCoords)
+      this.addMissingWordsToCanvas( availableCoords, canvas.fabricCanvas  );
     })
   };
 
-  initInputCanvas = () => {
-    let canvas = new fabric.Canvas('canvas');
-    const haus = new fabric.Text("Haus", {
-      fill: "red",
-      angle: -90,
-      hasControls: false,
-      hasBorders: false,
-      fontSize: 15,
-      textAlign: 'center',
-      fontFamily: 'Helvetica Nue, Helvetica, Sans-Serif, Arial, Trebuchet MS',
-      left: 62,
-      top: 110
-    });
+  getRandomColor = () => {
+    const {canvas} = this.state;
+    const fontColors = canvas.text.fontColors;
+    if(fontColors){
+      const randIndex = Math.floor(Math.random()*fontColors.length)
+      return fontColors[randIndex];
+    }
+  };
 
-    const mauer = new fabric.Text("Mauer", {
-      fill: "green",
-      angle: -90,
-      hasControls: false,
-      hasBorders: false,
-      fontSize: 15,
-      textAlign: 'center',
-      fontFamily: 'Helvetica Nue, Helvetica, Sans-Serif, Arial, Trebuchet MS',
-      left: 500,
-      top: 265
-    });
+  initializeCanvasObject = () => {
+    const {canvas } = this.state;
+    const fabricCanvas = new fabric.Canvas('canvas');
+    const {fontSize, hoverSize} = canvas.text;
+    const that = this;
 
-    // var canvas = this.__canvas = new fabric.Canvas('c');
     fabric.Object.prototype.transparentCorners = true;
     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
-    canvas.on('mouse:over', function(e) {
+    fabricCanvas.on('mouse:over', function(e) {
       if(e && e.target){
-        e.target.set('fontSize', '18');
-        canvas.renderAll();
+        e.target.set('fontSize', hoverSize);
+        fabricCanvas.renderAll();
       }
     });
 
-    canvas.on('mouse:out', function(e) {
+    fabricCanvas.on('mouse:out', function(e) {
       if(e && e.target){
-        e.target.set('fontSize', '15');
-        canvas.renderAll();
+        e.target.set('fontSize', fontSize);
+        fabricCanvas.renderAll();
       }
     });
 
-    canvas.on({
+    fabricCanvas.on({
+      'object:moving': that.handleCanvasObjectChange,
+      'mouse:up': that.handleCanvasMouseUp
+    });
+    canvas.fabricCanvas = fabricCanvas;
+    this.setState({canvas})
+  };
+
+  handleCanvasObjectChange = (element) => {
+    const {canvas} = this.state;
+    const fabricCanvas = canvas.fabricCanvas;
+    element.target.setCoords();
+    fabricCanvas.forEachObject(function(obj) {
+      if (obj === element.target) return;
+      if(element.target && element.target.intersectsWithObject(obj)){
+        console.log("hier")
+        this.indicateCollisionRegion(element.target, obj);
+      }else{
+        console.log("nein")
+        obj.set('opacity', 1);
+        if(obj.text.indexOf('|') !== -1){
+          obj.text = obj.text.replace('|','');
+          obj.fontSize = 15;
+        }
+      }
+      fabricCanvas.renderAll();
+    });
+  };
+
+  handleCanvasMouseUp = (element) => {
+    const {canvas} = this.state;
+    const fabricCanvas = canvas.fabricCanvas;
+    const collisionObj = element.target;
+
+    element.target.setCoords();
+    fabricCanvas.forEachObject(function(obj) {
+      if (obj === element.target) return;
+      if(element.target && element.target.intersectsWithObject(obj)){
+
+        console.log("isCollision")
+
+      }else
+        console.log("no coll")
+    });
+
+    //   console.log(collision.isCollision)
+    // console.log(collision.collidedObj)
+    // if(collision.isCollision && collision.collidedObj){
+    //   console.log("isCollision")
+    //   that.handleObjectCollision(collisionObj, collision, fabricCanvas);
+    // }else{
+    //   console.log("no collision")
+    //   that.handleObjectNoCollision(collisionObj, fabricCanvas);
+    // }
+  };
+
+
+  initInputCanvas = () => {
+    let {canvas} = this.state;
+    let fabricCanvas = new fabric.Canvas('canvas');
+    const {fontSize, hoverSize} = canvas.text;
+    const that = this;
+
+    fabric.Object.prototype.transparentCorners = true;
+    fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
+
+    fabricCanvas.on('mouse:over', function(e) {
+      if(e && e.target){
+        e.target.set('fontSize', hoverSize);
+        fabricCanvas.renderAll();
+      }
+    });
+
+    fabricCanvas.on('mouse:out', function(e) {
+      if(e && e.target){
+        e.target.set('fontSize', fontSize);
+        fabricCanvas.renderAll();
+      }
+    });
+
+    fabricCanvas.on({
       'object:moving': onChange,
       'mouse:up':mouseUp
     });
@@ -138,61 +261,69 @@ class Input extends Component {
     //   canvas.renderAll();
     // }
 
-
-    let initialCoords={};
     function mouseUp(element) {
-      const collisionObj = element.target;
-      if(collision.isCollision && collision.collidedObj){
-        collision.collidedObj.text = collision.collidedObj.text.replace('|','');
-        let concatText = collision.collidedObj.text + collisionObj.text.toLowerCase();
-        if(collision.collisionPosition === "bottom") {
-          concatText = collisionObj.text + collision.collidedObj.text.toLowerCase();
-        }
-        console.log(concatText);
-        canvas.remove(collisionObj);
-        canvas.remove(collision.collidedObj)
-      }else{
-        if(initialCoords.top && initialCoords.left){
-          collisionObj.top = initialCoords.top;
-          collisionObj.left = initialCoords.left;
-          delete initialCoords.left;
-          delete initialCoords.top;
-          canvas.renderAll();
-        }
-      }
+
     }
 
     let collision = {
       isCollision : false
     };
-    const that = this;
 
     function onChange(options) {
-      if(!initialCoords.top){
-        initialCoords.top = options.target.top;
-        initialCoords.left = options.target.left;
-      }
-      options.target.setCoords();
-      canvas.forEachObject(function(obj) {
-        if (obj === options.target) return;
-        if(options.target && options.target.intersectsWithObject(obj)){
-          collision.collisionPosition = that.indicateCollisionRegion(options.target, obj);
-          collision.isCollision = true;
-          collision.collidedObj = obj;
-        }else{
-          collision.isCollision = false;
-          obj.set('opacity', 1);
-          if(obj.text.indexOf('|') !== -1){
-            obj.text = obj.text.replace('|','');
-            obj.fontSize = 15;
-            delete collision.collidedObj;
-          }
-        }
-        canvas.renderAll();
-      });
+
     }
-    canvas.add(haus);
-    canvas.add(mauer);
+    canvas.words.displayed.forEach(word => {
+      fabricCanvas.add(word);
+    });
+  };
+
+  handleObjectNoCollision = (collisionObj, fabricCanvas) => {
+    const startCoords = this.getCoordinateObjById(collisionObj.id);
+    collisionObj.top = startCoords.top;
+    collisionObj.left = startCoords.left;
+    fabricCanvas.renderAll();
+  };
+
+  getCoordinateObjById = (id) => {
+    const {canvas} = this.state;
+    const wordObjs = canvas.text.wordObjs;
+    return wordObjs.find(coordObj => coordObj.id === id)
+  };
+
+  handleObjectCollision = (collisionObj, collision, fabricCanvas) => {
+    const {canvas} = this.state;
+    collision.collidedObj.text = collision.collidedObj.text.replace('|','');
+    let concatText = collision.collidedObj.text + collisionObj.text.toLowerCase();
+    if(collision.collisionPosition === "bottom") {
+      concatText = collisionObj.text + collision.collidedObj.text.toLowerCase();
+    }
+    console.log(concatText);
+    let availableCoords = [];
+    const wordObjs = canvas.text.wordObjs;
+    const collObjCoords = wordObjs.find(coordObj => coordObj.id === collisionObj.id);
+    const collidedObjCoords = wordObjs.find(coordObj => coordObj.id === collision.collidedObj.id);
+    availableCoords.push(collObjCoords);
+    availableCoords.push(collidedObjCoords);
+    let reuseWords = [];
+    reuseWords.push(collisionObj.text);
+    reuseWords.push(collision.collidedObj.text);
+    fabricCanvas.remove(collisionObj);
+    fabricCanvas.remove(collision.collidedObj);
+    this.addMissingWordsToCanvas(availableCoords, fabricCanvas, reuseWords)
+  };
+
+  addMissingWordsToCanvas = (availableCoords, fabricCanvas, reuseWords) => {
+    const {canvas} = this.state;
+    let availableWords = canvas.words.available.words;
+    availableCoords.forEach(coordsObj => {
+      const randIndex = Math.floor(Math.random()*availableWords.length);
+      const randomWord = availableWords.splice(randIndex,1)[0];
+      fabricCanvas.add(this.generateTextElement(randomWord, coordsObj.left, coordsObj.top, coordsObj.id));
+    });
+    if(reuseWords)
+    reuseWords.forEach(word => {
+      availableWords.push(word);
+    })
   };
 
   triggerFullscreenBtn = () => {
@@ -212,9 +343,13 @@ class Input extends Component {
   };
 
   componentDidMount() {
-    const height = window.screen.height - 500;
-    this.initCanvasDimensions(height);
-    this.initInputScreen();
+    const {canvas} = this.state;
+    const allWords = canvas.words.available.coordinates;
+    if(allWords && allWords.length !== 0){
+      const height = window.screen.height - 500;
+      this.initCanvasDimensions(height);
+      this.initInputScreen();
+    }
   }
 
   indicateCollisionRegion = (paramDraggedObj, paramStaticObj) => {
@@ -245,16 +380,15 @@ class Input extends Component {
   };
 
   render() {
-    const animate = true;
     const {canvas, isFullscreen} = this.state;
     let menu = [];
     if(!isFullscreen) {
       menu.push(
           <div id="inputMenu" key="menu">
             <Card
-                style={{ width:"100%", height:"250px" }}
+                style={{ width:"100%", height:"300px" }}
             >
-              <Tabs animate={animate} id="dashboard-tabs" onChange={this.refreshTab}>
+              <Tabs animate={true} id="dashboard-tabs" onChange={this.refreshTab}>
                 <Tab
                     className="tab"
                     id="setting"
@@ -262,6 +396,7 @@ class Input extends Component {
                     panel={(
                         <InputSettings
                             {...this.props}
+                            saveNewTextFormat={this.saveNewTextFormat}
                         />
                     )}
                 />
@@ -277,18 +412,7 @@ class Input extends Component {
                 />
               </Tabs>
             </Card>
-            <Button
-                icon="manually-entered-data"
-                text="Save"
-                style={{margin:"auto", display:"block", "marginTop":"10px", "marginLeft":"10px", float:"left"}}
-            />
-            <Button
-                id="fullscreenInput"
-                icon="manually-entered-data"
-                text="Vollbild"
-                style={{margin:"auto", display:"block", "marginTop":"10px", "marginRight":"10px", float:"right"}}
-                onClick={this.triggerFullscreenBtn}
-            />
+
           </div>
         )
     }
@@ -298,6 +422,13 @@ class Input extends Component {
           <div id="canvasContainer">
             <canvas id="canvas" width={canvas.dimensions.width+"px"} height={canvas.dimensions.height+"px"}/>
           </div>
+          <Button
+              id="fullscreenInput"
+              icon="manually-entered-data"
+              text="Vollbild"
+              style={{margin:"auto", display:"block", "marginTop":"20px", "marginRight":"20px", float:"right"}}
+              onClick={this.triggerFullscreenBtn}
+          />
           {menu}
         </div>
     );

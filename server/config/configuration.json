@@ -1,21 +1,33 @@
 {
   "input": {
-    "fontSize": 15,
+    "fontSize": 20,
     "fontFamily": "Helvetica Nue, Helvetica, Sans-Serif, Arial, Trebuchet MS",
-    "hoverSize": 18,
+    "hoverSize": 20,
     "dragSize": 20,
     "wordCount": 15,
     "wordObjs": [
       {
+        "id": 1,
         "left": 62,
         "top": 110
       },
       {
+        "id": 2,
         "left": 500,
+        "top": 265
+      },
+      {
+        "id": 3,
+        "left": 400,
+        "top": 265
+      },
+      {
+        "id": 4,
+        "left": 100,
         "top": 265
       }
     ],
-    "colors": [
+    "fontColors": [
       "#48AFF0",
       "#aa007f",
       "#0c0a7f",
