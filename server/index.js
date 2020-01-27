@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'client')));
 
-const routesPath = path.join(__dirname, "server/routes");
+const routesPath = path.join(__dirname, "routes");
 fs.readdirSync(routesPath).forEach(file => {
 	// ignore swap files
 	if (file.startsWith(".")) return;

@@ -17,7 +17,7 @@ class App extends Component {
     getConfig = async () => {
         let res = await axios({
             method: 'get',
-            url: `${apiUrl}config/input`,
+            url: `/config/input`,
         });
         if(res.data.length !== 0 && Object.entries(res.data.config).length !== 0 && res.data.config.constructor === Object){
             this.setState({
@@ -35,7 +35,7 @@ class App extends Component {
     sendWord = async (word) => {
         let res = await axios({
             method: 'post',
-            url: `${apiUrl}word`,
+            url: `/word`,
             headers: {'Content-Type':'application/json'},
             data:{ word }
         });
