@@ -96,7 +96,7 @@ class Input extends Component {
       // this.initInputCanvas();
       this.initializeCanvasObject();
       const availableCoords = canvas.words.available.coordinates;
-      console.log(availableCoords)
+      console.log(canvas)
       this.addMissingWordsToCanvas( availableCoords, canvas.fabricCanvas  );
     })
   };
@@ -315,6 +315,7 @@ class Input extends Component {
   addMissingWordsToCanvas = (availableCoords, fabricCanvas, reuseWords) => {
     const {canvas} = this.state;
     let availableWords = canvas.words.available.words;
+    console.log(availableWords)
     availableCoords.forEach(coordsObj => {
       const randIndex = Math.floor(Math.random()*availableWords.length);
       const randomWord = availableWords.splice(randIndex,1)[0];
@@ -324,6 +325,7 @@ class Input extends Component {
     reuseWords.forEach(word => {
       availableWords.push(word);
     })
+    fabricCanvas.renderAll();
   };
 
   triggerFullscreenBtn = () => {
@@ -347,8 +349,8 @@ class Input extends Component {
     const allWords = canvas.words.available.coordinates;
     if(allWords && allWords.length !== 0){
       const height = window.screen.height - 500;
+      // this.initInputScreen();
       this.initCanvasDimensions(height);
-      this.initInputScreen();
     }
   }
 
