@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Input from "./Input";
-const apiUrl = "http://localhost:5000/";
+import { Position, Toaster, Intent } from '@blueprintjs/core';
 
 
 class App extends Component {
+
+    refHandlers = {
+        toaster: ref => {
+            this.toaster = ref;
+        },
+    };
+
     constructor(props) {
         super(props);
         this.state = {
@@ -39,15 +46,32 @@ class App extends Component {
             headers: {'Content-Type':'application/json'},
             data:{ word }
         });
-        this.setState({
-            apiResponse: res.data.message
-        })
+        if(res.data.message) {
+            const intent = Intent.SUCCESS;
+            this.sendToast(res.data.message, intent);
+        }else {
+            const intent = Intent.DANGER;
+            this.sendToast("Error", intent);
+        }
     };
 
     async componentWillMount() {
         await this.getConfig();
-        // await this.sendWord("hellos");
     }
+
+    sendToast = (message, intent ) => {
+        const timeout = 1500;
+        const icon = 'tick-circle';
+        this.toaster.show({
+            message: (
+                <div>{message}</div>
+            ),
+            intent,
+            icon,
+            timeout,
+        });
+        this.toaster.dismiss();
+    };
 
 
   render() {
@@ -61,6 +85,10 @@ class App extends Component {
               words={words}
               config={config}
               sendWord={this.sendWord}
+          />
+          <Toaster
+              position={Position.BOTTOM}
+              ref={this.refHandlers.toaster}
           />
       </div>
     );

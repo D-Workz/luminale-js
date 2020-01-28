@@ -34,11 +34,11 @@ class Input extends Component {
 
   initCanvasDimensions = (height) => {
     const {canvas} = this.state;
-    const {config, words} = this.props;
+    const {config, words, sendWord} = this.props;
     canvas.dimensions.width = height * canvas.image.width / canvas.image.height;
     canvas.dimensions.height = height;
     this.setState({canvas}, () => {
-      const inputCanvas = new InputCanvas('canvas', config, words);
+      const inputCanvas = new InputCanvas('canvas', config, words, sendWord);
       inputCanvas.addMissingWordsToCanvas( canvas.available.coordinates );
     });
   };
