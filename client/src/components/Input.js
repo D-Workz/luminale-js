@@ -22,7 +22,6 @@ class Input extends Component {
           height: 0,
           width: 0
         },
-        isEdit:false
       },
       isFullscreen : false
     };
@@ -39,10 +38,10 @@ class Input extends Component {
     canvas.dimensions.width = height * canvas.image.width / canvas.image.height;
     canvas.dimensions.height = height;
     this.setState({canvas}, () => {
-      // const fabricCanvas = new InputCanvas('canvas', config, words);
+      const inputCanvas = new InputCanvas('canvas', config, words);
       const availableCoords = canvas.available.coordinates;
-      // fabricCanvas.addMissingWordsToCanvas( availableCoords );
-    })
+      inputCanvas.addMissingWordsToCanvas( availableCoords );
+    });
   };
 
   triggerFullscreenBtn = () => {
@@ -99,11 +98,6 @@ class Input extends Component {
                     className="tab"
                     id="words"
                     title="Wörter"
-                    panel={(
-                        <InputCanvas
-                            {...this.props}
-                        />
-                    )}
                 />
               </Tabs>
             </Card>
