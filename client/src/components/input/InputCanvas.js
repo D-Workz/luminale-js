@@ -4,12 +4,19 @@ import { fabric } from 'fabric';
 fabric.Object.prototype.transparentCorners = true;
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
-let availableWords = [];
 
 class InputCanvas {
   constructor(elementId, textSettings, words) {
-    this.fabricCanvas = new fabric.Canvas(elementId);;
+    console.log(textSettings)
+    this.fabricCanvas = new fabric.Canvas(elementId, {
+      selection: false,
+      hoverCursor: 'pointer',
+      rotationCursor: 'default',
+      controlsAboveOverlay: true,
+      centeredScaling: true
+    });
     this.allCoords = textSettings.wordObjs;
+    this.wordCount = textSettings.wordCount;
     this.allWords = words;
     this.isEdit = false;
     this.text = {
@@ -17,9 +24,11 @@ class InputCanvas {
       dragSize: textSettings.dragSize,
       hoverSize: textSettings.hoverSize,
       fontFamily: textSettings.fontFamily,
-      wordCount: textSettings.wordCount,
       fontColors:textSettings.fontColors,
     };
+    this.collision = {
+      collisionPosition : "top"
+  };
     this.initializeFabricCanvas();
   }
 
@@ -29,17 +38,17 @@ class InputCanvas {
   };
 
   initializeFabricCanvas = () => {
-    availableWords = this.allWords;
+    const that = this;
     this.fabricCanvas.on('mouse:over', function(e) {
       if(e && e.target){
-        e.target.set('fontSize', this.hoverSize);
-        this.fabricCanvas.renderAll();
+        e.target.set('fontSize', that.text.hoverSize);
+        that.fabricCanvas.renderAll();
       }
     });
     this.fabricCanvas.on('mouse:out', function(e) {
       if(e && e.target){
-        e.target.set('fontSize', this.fontSize);
-        this.fabricCanvas.renderAll();
+        e.target.set('fontSize', that.text.fontSize);
+        that.fabricCanvas.renderAll();
       }
     });
     this.fabricCanvas.on({
@@ -49,49 +58,49 @@ class InputCanvas {
   };
 
   onObjectChange = (element) => {
+    const that = this;
     element.target.setCoords();
     this.fabricCanvas.forEachObject(function(obj) {
       if (obj === element.target) return;
       if(element.target && element.target.intersectsWithObject(obj)){
-        console.log("hier")
-        this.indicateCollisionRegion(element.target, obj);
-      }else{
-        console.log("nein")
+        that.indicateCollisionRegion(element.target, obj);
+      }else {
         obj.set('opacity', 1);
-        if(obj.text.indexOf('|') !== -1){
-          obj.text = obj.text.replace('|','');
-          obj.fontSize = 15;
+        if (obj.text.indexOf('|') !== -1) {
+          obj.text = obj.text.replace('|', '');
+          obj.fontSize = that.text.fontSize;
         }
       }
-      this.fabricCanvas.renderAll();
     });
+    this.fabricCanvas.renderAll();
   };
 
   onMouseUp = (element) => {
-    // const collisionObj = element.target;
+    if(!element || !element.target) return;
+    const that = this;
+    const collisionObj = element.target;
+    let isCollided = false;
     element.target.setCoords();
-    this.fabricCanvas.forEachObject(function(obj) {
-      if (obj === element.target) return;
-      if(element.target && element.target.intersectsWithObject(obj)){
+    try {
+      this.fabricCanvas
+          .getObjects()
+          .some(obj => {
+            if (obj === element.target) return;
+            if(element.target && element.target.intersectsWithObject(obj)){
+              that.handleObjectCollision(collisionObj, obj);
+              isCollided = true;
+              return true;
+            }
+          });
+    }catch (e) {
 
-        console.log("isCollision")
-
-      }else
-        console.log("no coll")
-    });
-    //   console.log(collision.isCollision)
-    // console.log(collision.collidedObj)
-    // if(collision.isCollision && collision.collidedObj){
-    //   console.log("isCollision")
-    //   that.handleObjectCollision(collisionObj, collision, fabricCanvas);
-    // }else{
-    //   console.log("no collision")
-    //   that.handleObjectNoCollision(collisionObj, fabricCanvas);
-    // }
+    }
+    if(!isCollided && collisionObj) {
+      that.handleObjectNoCollision(collisionObj);
+    }
   };
 
   indicateCollisionRegion = (paramDraggedObj, paramStaticObj) => {
-    let collisionPosition = "top";
     let draggedObj = {
       center: (paramDraggedObj.getBoundingRect().top) + (paramDraggedObj.getBoundingRect().height / 2)
     };
@@ -104,42 +113,38 @@ class InputCanvas {
     }
     if(draggedObj.center < staticObj.center){
       staticObj.text += '|';
+      this.collision.collisionPosition = "top";
     }else {
       staticObj.text = '|'+ staticObj.text;
-      collisionPosition = "bottom";
+      this.collision.collisionPosition = "bottom";
     }
     paramStaticObj.text = (staticObj.text);
     paramStaticObj.fontSize = 25;
-    return collisionPosition;
   };
 
-  handleObjectCollision = (collisionObj, collision, fabricCanvas) => {
-    const {canvas} = this.state;
-    collision.collidedObj.text = collision.collidedObj.text.replace('|','');
-    let concatText = collision.collidedObj.text + collisionObj.text.toLowerCase();
-    if(collision.collisionPosition === "bottom") {
-      concatText = collisionObj.text + collision.collidedObj.text.toLowerCase();
+  handleObjectCollision = (paramDraggedObj,paramStaticObj) => {
+    paramStaticObj.text = paramStaticObj.text.replace('|','');
+    let concatText = paramStaticObj.text + paramDraggedObj.text.toLowerCase();
+    if(this.collision.collisionPosition === "bottom") {
+      concatText = paramDraggedObj.text + paramStaticObj.text.toLowerCase();
     }
     console.log(concatText);
     let availableCoords = [];
-    const wordObjs = canvas.text.wordObjs;
-    const collObjCoords = wordObjs.find(coordObj => coordObj.id === collisionObj.id);
-    const collidedObjCoords = wordObjs.find(coordObj => coordObj.id === collision.collidedObj.id);
-    availableCoords.push(collObjCoords);
-    availableCoords.push(collidedObjCoords);
+    availableCoords.push(this.allCoords.find(coordObj => coordObj.id === paramDraggedObj.id));
+    availableCoords.push(this.allCoords.find(coordObj => coordObj.id === paramStaticObj.id));
     let reuseWords = [];
-    reuseWords.push(collisionObj.text);
-    reuseWords.push(collision.collidedObj.text);
-    fabricCanvas.remove(collisionObj);
-    fabricCanvas.remove(collision.collidedObj);
-    this.addMissingWordsToCanvas(availableCoords, fabricCanvas, reuseWords)
+    reuseWords.push(paramDraggedObj.text);
+    reuseWords.push(paramStaticObj.text);
+    this.fabricCanvas.remove(paramDraggedObj);
+    this.fabricCanvas.remove(paramStaticObj);
+    this.addMissingWordsToCanvas(availableCoords, reuseWords)
   };
 
-  handleObjectNoCollision = (collisionObj, fabricCanvas) => {
+  handleObjectNoCollision = (collisionObj) => {
     const startCoords = this.getCoordinateObjById(collisionObj.id);
     collisionObj.top = startCoords.top;
     collisionObj.left = startCoords.left;
-    fabricCanvas.renderAll();
+    this.fabricCanvas.renderAll();
   };
 
   getCoordinateObjById = (id) => {
@@ -171,17 +176,15 @@ class InputCanvas {
   };
 
   addMissingWordsToCanvas = (availableCoords, reuseWords) => {
-
-    console.log(availableWords)
     availableCoords.forEach(coordsObj => {
-      const randIndex = Math.floor(Math.random()*availableWords.length);
-      const randomWord = availableWords.splice(randIndex,1)[0];
+      const randIndex = Math.floor(Math.random()*this.allWords.length);
+      const randomWord = this.allWords.splice(randIndex,1)[0];
       this.fabricCanvas.add(this.generateTextElement(randomWord, coordsObj.left, coordsObj.top, coordsObj.id));
     });
     if(reuseWords)
       reuseWords.forEach(word => {
-        availableWords.push(word);
-      })
+        this.allWords.push(word);
+      });
     this.fabricCanvas.renderAll();
   };
 

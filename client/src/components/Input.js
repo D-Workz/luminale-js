@@ -39,8 +39,7 @@ class Input extends Component {
     canvas.dimensions.height = height;
     this.setState({canvas}, () => {
       const inputCanvas = new InputCanvas('canvas', config, words);
-      const availableCoords = canvas.available.coordinates;
-      inputCanvas.addMissingWordsToCanvas( availableCoords );
+      inputCanvas.addMissingWordsToCanvas( canvas.available.coordinates );
     });
   };
 

@@ -2,8 +2,8 @@
   "input": {
     "fontSize": 20,
     "fontFamily": "Helvetica Nue, Helvetica, Sans-Serif, Arial, Trebuchet MS",
-    "hoverSize": 20,
-    "dragSize": 20,
+    "hoverSize": 22,
+    "dragSize": 25,
     "wordCount": 15,
     "wordObjs": [
       {
