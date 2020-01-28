@@ -2,19 +2,11 @@
   "name": "luminale-js",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "debug": "nodemon --inspect=0.0.0.0:5858 index.js",
-    "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build"
+    "dev": "concurrently \"cd server && npm run start\" \"cd client && npm run start\"",
+    "prod": "cd client && npm run build && cd server && npm run start"
   },
-  "keywords": [],
-  "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.16.3",
-    "fs": "0.0.1-security",
-    "morgan": "^1.9.1",
-    "body-parser": "^1.19.0"
+    "concurrently": "^5.1.0"
   }
 }
