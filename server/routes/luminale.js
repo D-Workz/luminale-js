@@ -28,7 +28,7 @@ router.get("/config/input", async (req, res, next) => {
 router.post("/word", async (req, res, next) => {
     try {
         return res.json({
-            message: req.body['hans']
+            message: req.body['word']
         });
     } catch (err) {
         return next(err);

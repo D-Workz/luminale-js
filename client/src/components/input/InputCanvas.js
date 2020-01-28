@@ -6,8 +6,8 @@ fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
 
 class InputCanvas {
-  constructor(elementId, textSettings, words) {
-    console.log(textSettings)
+  constructor(elementId, textSettings, words, sendWord) {
+    this.sendWord = sendWord;
     this.fabricCanvas = new fabric.Canvas(elementId, {
       selection: false,
       hoverCursor: 'pointer',
@@ -128,6 +128,7 @@ class InputCanvas {
     if(this.collision.collisionPosition === "bottom") {
       concatText = paramDraggedObj.text + paramStaticObj.text.toLowerCase();
     }
+    this.sendWord(concatText);
     console.log(concatText);
     let availableCoords = [];
     availableCoords.push(this.allCoords.find(coordObj => coordObj.id === paramDraggedObj.id));
