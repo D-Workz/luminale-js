@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "concurrently \"cd server && npm run start\" \"cd client && npm run start\"",
+    "start": "concurrently \"cd server && npm run start\" \"cd client && npm run start\"",
     "prod": "cd client && npm run build && cd server && npm run start"
   },
   "dependencies": {

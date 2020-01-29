@@ -4,13 +4,24 @@ React app, for luminale 2020
 
 ## Prerequisites
 In order to run this project node.js and npm both need to have been installed.
+<ol>
+<li>Clone this repo</li>
+<li>Navigate into repo (open luminale-js)</li>
+<li>Run npm i</li>
+<li>Navigate to the client folder</li>
+<li>Run npm i</li>
+<li>Navigate to the server folder</li>
+<li>Run npm i</li>
+</ol>
+Now you have all the dependencies and are ready to start the repo.
+
 
 ## Deployment
 <ol>
-<li>Clone this repo</li>
-<li>Run npm start from luminale-js to start the Express app</li>
-<li>Run npm start from the client directory to start the React app</li>
-<li>Visit http://localhost:3000/</li>
+<li>Navigate into main folder of repo</li>
+
+<li>Run npm start in Konsole</li>
+<li>Open http://localhost:3000/ in your browser</li>
 </ol>
 
 ## Built With
@@ -19,4 +30,4 @@ In order to run this project node.js and npm both need to have been installed.
 * [React-Router](https://reacttraining.com/react-router/core/guides/philosophy)
 
 for routing frontend 
-https://reacttraining.com/react-router/web/guides/quick-start
+https://reacttraining.com/react-r   outer/web/guides/quick-start
