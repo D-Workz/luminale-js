@@ -52,7 +52,8 @@ class Input extends Component {
             if(!screenfull.isFullscreen){
               this.setState({isFullscreen:false}, () => {
                 this.initCanvasDimensions(window.screen.height - 500)
-              })
+              });
+
             }
           })
         });

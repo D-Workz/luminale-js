@@ -17,3 +17,6 @@ In order to run this project node.js and npm both need to have been installed.
 * [React.js](https://reactjs.org/)
 * [Express.js](https://expressjs.com/)
 * [React-Router](https://reacttraining.com/react-router/core/guides/philosophy)
+
+for routing frontend 
+https://reacttraining.com/react-router/web/guides/quick-start

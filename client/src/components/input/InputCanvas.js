@@ -82,16 +82,14 @@ class InputCanvas {
     let isCollided = false;
     element.target.setCoords();
     try {
-      this.fabricCanvas
-          .getObjects()
-          .some(obj => {
-            if (obj === element.target) return;
-            if(element.target && element.target.intersectsWithObject(obj)){
-              that.handleObjectCollision(collisionObj, obj);
-              isCollided = true;
-              return true;
-            }
-          });
+      for(const obj of this.fabricCanvas.getObjects()){
+        if (obj === element.target) continue;
+        if(element.target && element.target.intersectsWithObject(obj)){
+          that.handleObjectCollision(collisionObj, obj);
+          isCollided = true;
+          break;
+        }
+      }
     }catch (e) {
 
     }
